@@ -365,6 +365,177 @@ class TwitterAPIMCPServer {
               required: ['tweet_text', 'proxy'],
             },
           } as Tool,
+          {
+            name: 'get_tweet_quotes',
+            description: 'Get quote tweets of a specific tweet',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                tweetId: {
+                  type: 'string',
+                  description: 'Twitter tweet ID',
+                },
+                cursor: {
+                  type: 'string',
+                  description: 'Pagination cursor for fetching next page',
+                },
+              },
+              required: ['tweetId'],
+            },
+          } as Tool,
+          {
+            name: 'get_tweet_retweeters',
+            description: 'Get users who retweeted a specific tweet',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                tweetId: {
+                  type: 'string',
+                  description: 'Twitter tweet ID',
+                },
+                cursor: {
+                  type: 'string',
+                  description: 'Pagination cursor for fetching next page',
+                },
+              },
+              required: ['tweetId'],
+            },
+          } as Tool,
+          {
+            name: 'get_tweet_thread',
+            description: 'Get full thread context of a tweet (parents and branches)',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                tweetId: {
+                  type: 'string',
+                  description: 'Twitter tweet ID',
+                },
+                cursor: {
+                  type: 'string',
+                  description: 'Pagination cursor for fetching next page',
+                },
+              },
+              required: ['tweetId'],
+            },
+          } as Tool,
+          {
+            name: 'get_user_mentions',
+            description: 'Get tweets mentioning a specific user',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                username: {
+                  type: 'string',
+                  description: 'Twitter username (without @)',
+                },
+                cursor: {
+                  type: 'string',
+                  description: 'Pagination cursor for fetching next page',
+                },
+                queryType: {
+                  type: 'string',
+                  description: 'Sort order for results',
+                  enum: ['Latest', 'Top'],
+                  default: 'Latest',
+                },
+              },
+              required: ['username'],
+            },
+          } as Tool,
+          {
+            name: 'get_trends',
+            description: 'Get trending topics by region (1 = worldwide, 23424977 = US)',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                woeid: {
+                  type: 'string',
+                  description: 'Region ID, digits only (1 = worldwide)',
+                },
+                count: {
+                  type: 'integer',
+                  description: 'Number of trends to return (default: 30)',
+                },
+              },
+              required: ['woeid'],
+            },
+          } as Tool,
+          {
+            name: 'get_follow_relationship',
+            description: 'Check follow relationship between two users',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                source_username: {
+                  type: 'string',
+                  description: 'Twitter username of the source user (without @)',
+                },
+                target_username: {
+                  type: 'string',
+                  description: 'Twitter username of the target user (without @)',
+                },
+              },
+              required: ['source_username', 'target_username'],
+            },
+          } as Tool,
+          {
+            name: 'get_users_by_ids',
+            description: 'Get multiple user profiles by their IDs',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                user_ids: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Array of Twitter user IDs to retrieve',
+                },
+              },
+              required: ['user_ids'],
+            },
+          } as Tool,
+          {
+            name: 'get_article',
+            description: 'Get article content attached to a tweet',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                tweet_id: {
+                  type: 'string',
+                  description: 'Twitter tweet ID',
+                },
+              },
+              required: ['tweet_id'],
+            },
+          } as Tool,
+          {
+            name: 'get_user_timeline',
+            description: 'Get full tweet timeline of a user by ID (with optional replies and parent tweets)',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                user_id: {
+                  type: 'string',
+                  description: 'Twitter user ID (digits only)',
+                },
+                cursor: {
+                  type: 'string',
+                  description: 'Pagination cursor for fetching next page',
+                },
+                includeReplies: {
+                  type: 'boolean',
+                  description: 'Include reply tweets (default: false)',
+                  default: false,
+                },
+                includeParentTweet: {
+                  type: 'boolean',
+                  description: 'Include parent tweets (default: false)',
+                  default: false,
+                },
+              },
+              required: ['user_id'],
+            },
+          } as Tool,
         ],
       };
     });
@@ -407,6 +578,57 @@ class TwitterAPIMCPServer {
               args.tweetId as string,
               args.cursor as string,
               (args.queryType as string) || 'Relevance'
+            );
+
+          case 'get_tweet_quotes':
+            return await this.getTweetQuotes(
+              args.tweetId as string,
+              args.cursor as string
+            );
+
+          case 'get_tweet_retweeters':
+            return await this.getTweetRetweeters(
+              args.tweetId as string,
+              args.cursor as string
+            );
+
+          case 'get_tweet_thread':
+            return await this.getTweetThread(
+              args.tweetId as string,
+              args.cursor as string
+            );
+
+          case 'get_user_mentions':
+            return await this.getUserMentions(
+              args.username as string,
+              args.cursor as string,
+              (args.queryType as string) || 'Latest'
+            );
+
+          case 'get_trends':
+            return await this.getTrends(
+              args.woeid as string,
+              args.count as number
+            );
+
+          case 'get_follow_relationship':
+            return await this.getFollowRelationship(
+              args.source_username as string,
+              args.target_username as string
+            );
+
+          case 'get_users_by_ids':
+            return await this.getUsersByIds(args.user_ids as string[]);
+
+          case 'get_article':
+            return await this.getArticle(args.tweet_id as string);
+
+          case 'get_user_timeline':
+            return await this.getUserTimeline(
+              args.user_id as string,
+              args.cursor as string,
+              args.includeReplies as boolean,
+              args.includeParentTweet as boolean
             );
 
           case 'get_user_followers':
@@ -618,6 +840,166 @@ class TwitterAPIMCPServer {
     if (queryType) params.queryType = queryType;
 
     const data = await this.makeRequest(`/tweet/replies/v2`, params);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(data, null, 2),
+        },
+      ],
+    };
+  }
+
+  private async getTweetQuotes(
+    tweetId: string,
+    cursor?: string
+  ): Promise<CallToolResult> {
+    const params: Record<string, any> = { tweetId };
+    if (cursor) params.cursor = cursor;
+
+    const data = await this.makeRequest(`/tweet/quotes`, params);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(data, null, 2),
+        },
+      ],
+    };
+  }
+
+  private async getTweetRetweeters(
+    tweetId: string,
+    cursor?: string
+  ): Promise<CallToolResult> {
+    const params: Record<string, any> = { tweetId };
+    if (cursor) params.cursor = cursor;
+
+    const data = await this.makeRequest(`/tweet/retweeters`, params);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(data, null, 2),
+        },
+      ],
+    };
+  }
+
+  private async getTweetThread(
+    tweetId: string,
+    cursor?: string
+  ): Promise<CallToolResult> {
+    const params: Record<string, any> = { tweetId };
+    if (cursor) params.cursor = cursor;
+
+    const data = await this.makeRequest(`/tweet/thread_context`, params);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(data, null, 2),
+        },
+      ],
+    };
+  }
+
+  private async getUserMentions(
+    username: string,
+    cursor?: string,
+    queryType: string = 'Latest'
+  ): Promise<CallToolResult> {
+    const params: Record<string, any> = { userName: username, queryType };
+    if (cursor) params.cursor = cursor;
+
+    const data = await this.makeRequest(`/user/mentions`, params);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(data, null, 2),
+        },
+      ],
+    };
+  }
+
+  private async getTrends(
+    woeid: string,
+    count?: number
+  ): Promise<CallToolResult> {
+    const params: Record<string, any> = { woeid };
+    if (count) params.count = count;
+
+    const data = await this.makeRequest(`/trends`, params);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(data, null, 2),
+        },
+      ],
+    };
+  }
+
+  private async getFollowRelationship(
+    sourceUsername: string,
+    targetUsername: string
+  ): Promise<CallToolResult> {
+    const data = await this.makeRequest(`/user/check_follow_relationship`, {
+      source_user_name: sourceUsername,
+      target_user_name: targetUsername,
+    });
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(data, null, 2),
+        },
+      ],
+    };
+  }
+
+  private async getUsersByIds(userIds: string[]): Promise<CallToolResult> {
+    // API expects comma-separated string
+    const data = await this.makeRequest(`/user/batch_info_by_ids`, {
+      userIds: userIds.join(','),
+    });
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(data, null, 2),
+        },
+      ],
+    };
+  }
+
+  private async getArticle(tweetId: string): Promise<CallToolResult> {
+    const data = await this.makeRequest(`/article`, { tweet_id: tweetId });
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(data, null, 2),
+        },
+      ],
+    };
+  }
+
+  private async getUserTimeline(
+    userId: string,
+    cursor?: string,
+    includeReplies: boolean = false,
+    includeParentTweet: boolean = false
+  ): Promise<CallToolResult> {
+    const params: Record<string, any> = {
+      userId,
+      includeReplies,
+      includeParentTweet,
+    };
+    if (cursor) params.cursor = cursor;
+
+    const data = await this.makeRequest(`/user/tweet_timeline`, params);
     return {
       content: [
         {

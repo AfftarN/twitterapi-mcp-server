@@ -1,6 +1,6 @@
 {
   "name": "@afftar/twitterapi-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MCP server for TwitterAPI.io - Access Twitter data through a unified API interface (AfftarN fork with current endpoints)",
   "author": "AfftarN",
   "license": "MIT",
