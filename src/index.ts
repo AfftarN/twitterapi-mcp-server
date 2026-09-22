@@ -227,13 +227,11 @@ class TwitterAPIMCPServer {
                   type: 'string',
                   description: 'Pagination cursor for fetching next page',
                 },
-                sinceTime: {
-                  type: 'integer',
-                  description: 'Unix timestamp in seconds - get replies on or after this time',
-                },
-                untilTime: {
-                  type: 'integer',
-                  description: 'Unix timestamp in seconds - get replies before this time',
+                queryType: {
+                  type: 'string',
+                  description: 'Sort order for replies',
+                  enum: ['Relevance', 'Latest', 'Likes'],
+                  default: 'Relevance',
                 },
               },
               required: ['tweetId'],
@@ -408,8 +406,7 @@ class TwitterAPIMCPServer {
             return await this.getTweetReplies(
               args.tweetId as string,
               args.cursor as string,
-              args.sinceTime as number,
-              args.untilTime as number
+              (args.queryType as string) || 'Relevance'
             );
 
           case 'get_user_followers':
@@ -614,15 +611,13 @@ class TwitterAPIMCPServer {
   private async getTweetReplies(
     tweetId: string,
     cursor?: string,
-    sinceTime?: number,
-    untilTime?: number
+    queryType?: string
   ): Promise<CallToolResult> {
     const params: Record<string, any> = { tweetId };
     if (cursor) params.cursor = cursor;
-    if (sinceTime) params.sinceTime = sinceTime;
-    if (untilTime) params.untilTime = untilTime;
+    if (queryType) params.queryType = queryType;
 
-    const data = await this.makeRequest(`/tweet/replies`, params);
+    const data = await this.makeRequest(`/tweet/replies/v2`, params);
     return {
       content: [
         {

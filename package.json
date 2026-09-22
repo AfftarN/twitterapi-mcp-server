@@ -1,8 +1,8 @@
 {
-  "name": "twitterapi-mcp-server",
+  "name": "@afftar/twitterapi-mcp",
   "version": "1.0.0",
-  "description": "MCP server for TwitterAPI.io - Access Twitter data through a unified API interface",
-  "author": "yilin",
+  "description": "MCP server for TwitterAPI.io - Access Twitter data through a unified API interface (AfftarN fork with current endpoints)",
+  "author": "AfftarN",
   "license": "MIT",
   "main": "build/index.js",
   "type": "commonjs",
@@ -46,10 +46,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Jing-yilin/twitterapi-mcp-server.git"
+    "url": "git+https://github.com/AfftarN/twitterapi-mcp-server.git"
   },
   "bugs": {
-    "url": "https://github.com/Jing-yilin/twitterapi-mcp-server/issues"
+    "url": "https://github.com/AfftarN/twitterapi-mcp-server/issues"
   },
-  "homepage": "https://github.com/Jing-yilin/twitterapi-mcp-server#readme"
+  "homepage": "https://github.com/AfftarN/twitterapi-mcp-server#readme"
 }
